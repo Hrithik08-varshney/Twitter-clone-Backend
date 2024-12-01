@@ -1,11 +1,12 @@
 import express from "express";
 
+//Initializes an Express application. This app object will be used to define routes and middleware for the server.
 const app = express();
 
-app.get("/",(req,res)=>{
-    res.send("Server is ready")
-})
+//It is used to apply middleware or define routes for specific paths.
+app.use("/api/auth", authRoutes);
 
-app.listen(8000,() =>{
-    console.log("Server is running on port 8000");
-})
+//Starts the server and listens for incoming requests on the specified port
+app.listen(8000, () => {
+  console.log("Server is running on port 8000");
+});
