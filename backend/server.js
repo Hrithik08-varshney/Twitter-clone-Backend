@@ -1,4 +1,11 @@
-console.log("server is running")
+import express from "express";
 
+const app = express();
 
-//11:54
+app.get("/",(req,res)=>{
+    res.send("Server is ready")
+})
+
+app.listen(8000,() =>{
+    console.log("Server is running on port 8000");
+})
