@@ -1,5 +1,5 @@
 import express from "express";
-
+import authRoutes from "./routes/auth.routes.js"
 //Initializes an Express application. This app object will be used to define routes and middleware for the server.
 const app = express();
 
