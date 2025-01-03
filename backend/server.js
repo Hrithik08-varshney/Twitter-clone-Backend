@@ -12,8 +12,11 @@ const PORT = process.env.PORT || 8000;
 
 //The line app.use(express.json()); is used in an Express.js
 //application to parse incoming JSON payloads in the request body
-
 app.use(express.json());
+
+//to parse form data(urlencoded) - postman form encoded
+app.use(express.urlencoded({ extended: true }));
+
 //It is used to apply middleware or define routes for specific paths.
 app.use("/api/auth", authRoutes);
 
