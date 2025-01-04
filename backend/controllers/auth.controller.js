@@ -18,6 +18,12 @@ export const signup = async (req, res) => {
       return res.status(400).json({ error: "Email is already taken" });
     }
 
+    if (password.length < 6) {
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 6 characters long" });
+    }
+
     //hashpassword
     const salt = await bcrypt.genSalt(10); //Generates a salt with 10 rounds.
     const hashedPassword = await bcrypt.hash(password, salt); //Hashes the password with the salt.
@@ -31,7 +37,7 @@ export const signup = async (req, res) => {
     });
 
     if (newUser) {
-        //A function that generates an authentication token (likely a JWT) and sets it in a cookie.
+      //A function that generates an authentication token (likely a JWT) and sets it in a cookie.
       generateTokenAndSetCookie(newUser._id, res);
       await newUser.save();
       res.status(200).json({
@@ -54,9 +60,41 @@ export const signup = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  res.json({
-    data: "You hit the login endpoint",
-  });
+  try {
+    const { username, password } = req.body;
+    if (password.length < 6) {
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 6 characters long" });
+    }
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(400).json({ error: "User does not exists" });
+    } else {
+      const isPasswordCorrect = await bcrypt.compare(
+        password,
+        user?.password || ""
+      );
+      if (!isPasswordCorrect) {
+        return res.status(400).json({ error: "Invalid Password" });
+      }
+      generateTokenAndSetCookie(user._id, res);
+
+      res.status(200).json({
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        fullName: user.fullName,
+        followersd: user.followers,
+        following: user.following,
+        profileImg: user.profileImg,
+        coverImg: user.coverImg,
+      });
+    }
+  } catch (error) {
+    console.log("Error in login controller", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 };
 
 export const logout = async (req, res) => {
