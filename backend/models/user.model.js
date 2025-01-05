@@ -54,7 +54,7 @@ const userSchema = new mongoose.Schema(
 );
 
 //Converts the userSchema into a usable model.
-const User = mongoose.modelNames("User", userSchema);
+const User = mongoose.model("User", userSchema);
 //The model represents the users collection in MongoDB (automatically pluralized).
 
 export default User;
