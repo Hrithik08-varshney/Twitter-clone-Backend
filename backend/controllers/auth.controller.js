@@ -62,15 +62,18 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { username, password } = req.body;
+    //password check
     if (password.length < 6) {
       return res
         .status(400)
         .json({ error: "Password must be at least 6 characters long" });
     }
     const user = await User.findOne({ username });
+    //checking if user exists or not
     if (!user) {
       return res.status(400).json({ error: "User does not exists" });
     } else {
+      //checking correct password in database
       const isPasswordCorrect = await bcrypt.compare(
         password,
         user?.password || ""
