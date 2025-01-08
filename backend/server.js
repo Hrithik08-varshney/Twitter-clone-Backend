@@ -1,6 +1,11 @@
+//packages
 import express from "express";
-import authRoutes from "./routes/auth.routes.js";
+import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
+//routes
+import authRoutes from "./routes/auth.routes.js";
+import userRoutes from "./routes/user.routes.js";
+//utility
 import connectMongoDB from "./db/connectMongoDB.js";
 
 //This initializes the dotenv library and
@@ -17,8 +22,13 @@ app.use(express.json());
 //to parse form data(urlencoded) - postman form encoded
 app.use(express.urlencoded({ extended: true }));
 
+//middle to use the cookie in protectRoute middleware
+app.use(cookieParser());
+
 //It is used to apply middleware or define routes for specific paths.
 app.use("/api/auth", authRoutes);
+
+app.use("/api/users", userRoutes);
 
 //Starts the server and listens for incoming requests on the specified port
 app.listen(PORT, () => {
