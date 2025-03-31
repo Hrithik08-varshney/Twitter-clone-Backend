@@ -55,16 +55,49 @@ export const followUnfollowUser = async (req, res) => {
       await User.findByIdAndUpdate(req.user._id, { $push: { following: id } });
       //send notification
       const newNotification = new Notification({
-        type:"follow",
+        type: "follow",
         from: req.user._id,
-        to: userToModify._id
-      })
+        to: userToModify._id,
+      });
 
       await newNotification.save();
 
       //TODO return the id of the user as a response
       res.status(200).json({ message: "User followed successfully" });
-
     }
   } catch (error) {}
+};
+
+export const getSuggestedUsers = async (req, res) => {
+  try {
+    //Extract the logged-in user’s ID:
+    const userId = req.user._id;
+    //Fetch the list of users the logged-in user is following:
+    const usersFollowedByMe = await User.findById(userId).select("following");
+    //Get 10 random users (excluding the logged-in user):
+    const users = await User.aggregate([
+      {
+        //Ensures the logged-in user is excluded from the list.
+        $match: {
+          _id: { $ne: userId },
+        },
+      },
+      {
+        //Randomly selects 10 users.
+        $sample: { size: 10 },
+      },
+    ]);
+    //Filter out users that are already followed by the logged-in user:
+    const filteredUsers = users.filter(
+      (user) => !usersFollowedByMe.following.includes(user._id)
+    );
+    //Pick the first 4 suggested users:
+    const suggestedUsers = filteredUsers.slice(0, 4);
+    //Ensure passwords are not exposed:
+    suggestedUsers.forEach((user) => (user.password = null));
+    res.status(200).json(suggestedUsers);
+  } catch (error) {
+    console.log("Error in getSuggestedUsers: ", error.message);
+    res.status(500).json({ error: error.message });
+  }
 };
