@@ -105,17 +105,9 @@ export const getSuggestedUsers = async (req, res) => {
 };
 
 export const updateUserProfile = async (req, res) => {
-  const {
-    fullName,
-    email,
-    username,
-    currentPassword,
-    newPassword,
-    bio,
-    link,
-    profileImg,
-    coverImg,
-  } = req.body;
+  const { fullName, email, username, currentPassword, newPassword, bio, link } =
+    req.body;
+  let { profileImg, coverImg } = req.body;
   const userId = req.user._id;
 
   try {
