@@ -6,6 +6,7 @@ import { v2 as cloudinary } from "cloudinary";
 //routes
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
+import postRoutes from "./routes/post.routes.js"
 //utility
 import connectMongoDB from "./db/connectMongoDB.js";
 
@@ -13,6 +14,7 @@ import connectMongoDB from "./db/connectMongoDB.js";
 // loads the variables defined in a .env file into process.env.
 dotenv.config();
 
+//configuration for profile and cover image upload platform - cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -37,6 +39,8 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 
 app.use("/api/users", userRoutes);
+
+app.use("/api/posts",postRoutes)
 
 //Starts the server and listens for incoming requests on the specified port
 app.listen(PORT, () => {
