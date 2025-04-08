@@ -106,10 +106,14 @@ export const likeUnlikePost = async (req, res) => {
     if (userLikedPost) {
       //If Already Liked → Unlike the Post
       await Post.updateOne({ _id: postId }, { $pull: { likes: userId } });
+      //removing the liked posts
+      await User.updateOne({ _id: userId }, { $pull: { likedPosts: postId } });
       res.status(200).json({ message: "Post unliked successfully" });
     } else {
       //If Not Liked Yet → Like the Post
       post.likes.push(userId);
+      //adding into liked posts
+      await User.updateOne({ _id: userId }, { $push: { likedPosts: postId } });
       await post.save();
       const notification = new Notification({
         from: userId,
@@ -129,13 +133,41 @@ export const likeUnlikePost = async (req, res) => {
 export const getAllPosts = async (req, res) => {
   try {
     //Fetches all posts from the database and sorts them by createdAt in descending order (newest first).
-    const posts = await Post.find().sort({ createdAt: -1 });
+    const posts = await Post.find()
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "user", //Replaces the user field (which likely contains a user ID) in each post with the full user document from the User collection.
+        select: "-password",
+      })
+      .populate({
+        path: "comments.user", //getting the user details who dropped the comment
+        select: "-password",
+      });
+
     if (posts.length === 0) {
       return res.status(200).json([]);
     }
     res.status(200).json(posts);
   } catch (error) {
     console.log("Error in getAllPosts controller: ", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const getLikedPosts = async (req, res) => {
+  //Gets the id parameter from the request URL (e.g., /users/:id), and stores it in userId.
+  const userId = req.params.id;
+  try {
+    //Finds the user by their ID from the User collection.
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    //Finds all posts whose _id is included in the user's likedPosts array.
+    const likedPosts = await Post.find({ _id: { $in: user.likedPosts } })
+      .populate({ path: "user", select: "-password" }) //Populates the user field in each post, excluding the password field from the user data.
+      .populate({ path: "comments.user", select: "-password" }); //Populates the user field inside each comment, again excluding passwords.
+    res.status(200).json(likedPosts);
+  } catch (error) {
+    console.log("Error in getLikedPosts controller: ", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
