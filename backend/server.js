@@ -20,7 +20,7 @@ dotenv.config();
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
-  aoi_secret: process.env.CLOUDINARY_API_SECRET,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 //Initializes an Express application. This app object will be used to define routes and middleware for the server.
@@ -29,7 +29,9 @@ const PORT = process.env.PORT || 8000;
 
 //The line app.use(express.json()); is used in an Express.js
 //application to parse incoming JSON payloads in the request body
-app.use(express.json());
+app.use(express.json({limit:"1mb"}));
+
+//this above limit shouldn't be too high to avoid DOS attack
 
 //to parse form data(urlencoded) - postman form encoded
 app.use(express.urlencoded({ extended: true }));
