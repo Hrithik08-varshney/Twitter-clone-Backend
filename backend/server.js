@@ -1,4 +1,5 @@
 //packages
+import path from "path";
 import express from "express";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
@@ -27,9 +28,12 @@ cloudinary.config({
 const app = express();
 const PORT = process.env.PORT || 8000;
 
+// __dirname is not available in ES modules by default, so we use path.resolve() to get the current directory
+const __dirname = path.resolve();
+
 //The line app.use(express.json()); is used in an Express.js
 //application to parse incoming JSON payloads in the request body
-app.use(express.json({limit:"1mb"}));
+app.use(express.json({ limit: "1mb" }));
 
 //this above limit shouldn't be too high to avoid DOS attack
 
@@ -47,6 +51,18 @@ app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 
 app.use("/api/notifications", notificationRoutes);
+
+if (process.env.NODE_ENV === "production") {
+  // Serve static files from the React frontend app
+  app.use(express.static(path.join(__dirname, "frontend/dist")));
+
+  // For any route not handled by API, serve the React app's index.html (for client-side routing)
+
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
+  });
+}
 
 //Starts the server and listens for incoming requests on the specified port
 app.listen(PORT, () => {
